@@ -4,26 +4,33 @@ using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using log4net;
 
 namespace ElasticsearchStuff
 {
     class Program
     {
+        private static readonly ILog logger = LogManager.GetLogger(typeof(Program));
+
         private static string ES_NODE_URL = "http://localhost:9200";
+        private static string INDEX_NAME = "test";
+        private static string DOCUMENT_TYPE = "document";
+        private static int INTERVAL = 10;
 
         static void Main(string[] args)
         {
+            logger.Info("Retrieving docment schema.");
             var documentSchema = GetDocumentSchema(@"F:\Dev\DotNet\Configs\schema_document.txt");
+            logger.Info("Document schema retrieved.");
 
             var documentGenerator = new RandomDocumentGenerator(documentSchema);
-            var documentList = documentGenerator.GenerateDocuments(100);
 
-            var esClient = new ElasticClient(new Uri(ES_NODE_URL));
-            esClient.ClusterHealth();
-
+            var index = new Index(INDEX_NAME);
+            var type = new DocumentType(DOCUMENT_TYPE);
             var listDocument = documentGenerator.GenerateDocuments(1000);
+            var continuousInserter = new ContinuousBulkInserter(new Uri(ES_NODE_URL), documentGenerator, index, type, 1);
 
-            esClient.IndexMany(listDocument.Select(doc => doc.AsDictionary()), "test", "Type");
+            continuousInserter.Insert(1000);
         }
 
         private static Dictionary<string, string> GetDocumentSchema(string schemaFilePath)
