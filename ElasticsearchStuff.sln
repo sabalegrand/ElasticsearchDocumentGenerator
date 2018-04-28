@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticsearchStuff", "ElasticsearchStuff\ElasticsearchStuff.csproj", "{9346EB4A-698C-47BE-B6CA-707E7D6CB6EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticsearchDocumentGenerator", "ElasticsearchStuff\ElasticsearchDocumentGenerator.csproj", "{9346EB4A-698C-47BE-B6CA-707E7D6CB6EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticsearchStuffTests", "ElasticsearchStuffTests\ElasticsearchStuffTests.csproj", "{ECE99563-3E11-451C-BA04-B8FE97F26D69}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticsearchDocumentGeneratorTests", "ElasticsearchStuffTests\ElasticsearchDocumentGeneratorTests.csproj", "{ECE99563-3E11-451C-BA04-B8FE97F26D69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
