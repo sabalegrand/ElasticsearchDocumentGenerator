@@ -8,6 +8,7 @@ namespace ElasticsearchStuff
     class ContinuousBulkInserter: BulkInserter
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(Program));
+        public static int IndexDocumentsCount = 0;
 
         private readonly RandomDocumentGenerator documentGenerator;
         private readonly Index index;
@@ -31,13 +32,12 @@ namespace ElasticsearchStuff
         public void Insert(int numberOfDocuments)
         {
             logger.Info($"Starting periodic bulk insertion with interval of {intervalInSecondes} seconds");
-
             while (true)
             {
                 var listDocument = documentGenerator.GenerateDocuments(numberOfDocuments);
                 logger.Info($"Indexing {numberOfDocuments} documents...");
                 BulkInsert(listDocument.Select(doc => doc.AsDictionary()).ToList(), index, type);
-                
+                IndexDocumentsCount += numberOfDocuments;
                 Thread.Sleep(intervalInSecondes * 1000);
             }
         }
