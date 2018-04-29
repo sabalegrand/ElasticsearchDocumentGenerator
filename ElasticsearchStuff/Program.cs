@@ -1,10 +1,6 @@
-﻿using System;
-using Nest;
-using System.Linq;
-using System.IO;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using log4net;
+﻿using log4net;
+using ElasticsearchStuff.Schema;
+using System;
 
 namespace ElasticsearchStuff
 {
@@ -15,12 +11,11 @@ namespace ElasticsearchStuff
         private static string ES_NODE_URL = "http://localhost:9200";
         private static string INDEX_NAME = "test";
         private static string DOCUMENT_TYPE = "document";
-        private static int INTERVAL = 10;
 
         static void Main(string[] args)
         {
             logger.Info("Retrieving docment schema.");
-            var documentSchema = GetDocumentSchema(@"F:\Dev\DotNet\Configs\schema_document.txt");
+            var documentSchema = new DocumentSchemaReader(@"F:\Dev\DotNet\Configs\schema_document.txt").GetDocumentSchema();
             logger.Info("Document schema retrieved.");
 
             var documentGenerator = new RandomDocumentGenerator(documentSchema);
@@ -31,19 +26,6 @@ namespace ElasticsearchStuff
             var continuousInserter = new ContinuousBulkInserter(new Uri(ES_NODE_URL), documentGenerator, index, type, 1);
 
             continuousInserter.Insert(1000);
-        }
-
-        private static Dictionary<string, string> GetDocumentSchema(string schemaFilePath)
-        {
-            var schema = new Dictionary<string, string>();
-
-            using (StreamReader file = File.OpenText(schemaFilePath))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                schema = (Dictionary<string, string>)serializer.Deserialize(file, typeof(Dictionary<string, string>));
-            }
-
-            return schema;
         }
     }
 }

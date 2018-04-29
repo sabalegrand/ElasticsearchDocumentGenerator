@@ -1,23 +1,20 @@
-﻿using System;
+﻿using ElasticsearchStuff.Schema;
+using log4net;
+using System;
 using System.Collections.Generic;
 using static ElasticsearchStuff.ValueGenerator;
 
 namespace ElasticsearchStuff
 {
 
-    enum FieldType
-    {
-        String,
-        Integer,
-        Float,
-        Date
-    }
-
+  
     class RandomDocumentGenerator
     {
-        private Dictionary<string, string> documentSchema;
+        private static readonly ILog logger = LogManager.GetLogger(typeof(RandomDocumentGenerator));
 
-        public RandomDocumentGenerator(Dictionary<string, string> documentSchema)
+        private List<DocumentField> documentSchema;
+
+        public RandomDocumentGenerator(List<DocumentField> documentSchema)
         {
             this.documentSchema = documentSchema;
         }
@@ -25,37 +22,46 @@ namespace ElasticsearchStuff
         public Document GenerateDocument()
         {
             Document document = new Document();
-
-            foreach (var schema in documentSchema)
+            try
             {
-                document.AddField(GenerateField(schema.Key, schema.Value));
+                foreach (var fieldSchema in documentSchema)
+                {
+                    document.AddField(GenerateField(fieldSchema));
+                }
             }
+            catch (Exception)
+            {
+                logger.Error("An error has occurred during the document generation.");
+                throw;
+            }
+         
              
             return document;
         }
 
-        private KeyValuePair<string, object> GenerateField(string fieldName, string fieldType)
+        private KeyValuePair<string, object> GenerateField(DocumentField fieldSchema)
         {
-            var field = new KeyValuePair<string, object>();
-            FieldType type;
+            var field = new KeyValuePair<string, object>(); 
 
-            if (!Enum.TryParse(fieldType, out type))
-                throw new ArgumentException($"The field type {fieldType} is not supported !");
-
-            switch (type)
+            switch (fieldSchema.FieldType)
             {
                 case FieldType.String:
-                    field = new KeyValuePair<string, object>(fieldName, GenerateString());
+                    var stringField = (StringField)fieldSchema;
+                    field = new KeyValuePair<string, object>(stringField.FieldName, GenerateString(stringField.Length, stringField.PossibleValues));
                     break;
                 case FieldType.Integer:
-                    field = new KeyValuePair<string, object>(fieldName, GenerateInteger());
+                    var integerField = (IntegerField)fieldSchema;
+                    field = new KeyValuePair<string, object>(integerField.FieldName, GenerateInteger(integerField.Min, integerField.Max));
                     break;
                 case FieldType.Float:
-                    field = new KeyValuePair<string, object>(fieldName, GenerateFloat());
+                    var floatField = (FloatField)fieldSchema;
+                    field = new KeyValuePair<string, object>(floatField.FieldName, GenerateFloat(floatField.Min, floatField.Max));
                     break;
                 case FieldType.Date:
-                    field = new KeyValuePair<string, object>(fieldName, GenerateDate());
+                    var dateField = (DateField)fieldSchema;
+                    field = new KeyValuePair<string, object>(dateField.FieldName, GenerateDate(dateField.Lower, dateField.Upper));
                     break;
+
             }
 
             return field;
@@ -79,8 +85,11 @@ namespace ElasticsearchStuff
         private const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private static Random random = random = new Random();
 
-        public static string GenerateString(int length = 10)
+        public static string GenerateString(int length = 10, List<string> possibleValues = null)
         {
+            if (possibleValues != null && possibleValues.Count != 0)
+                return possibleValues[random.Next(0, possibleValues.Count - 1)];
+
             var generatedString = new char[length];
 
             for (int i = 0; i < generatedString.Length; i++)
@@ -96,12 +105,12 @@ namespace ElasticsearchStuff
             return random.Next(min, max);
         }
 
-        public static float GenerateFloat(int min = 0, int max = 256)
+        public static float GenerateFloat(float min = 0, float max = 256)
         {
             return (float)(random.NextDouble() * max + min);
         }
 
-        public static DateTime GenerateDate()
+        public static DateTime GenerateDate(DateTime lower, DateTime upper)
         {
             var date = DateTime.UtcNow.AddDays(-1 * random.Next(0, 250));
             return date;

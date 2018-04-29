@@ -67,6 +67,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomDocumentGenerator.cs" />
+    <Compile Include="Schema\DocumentSchemaReader.cs" />
+    <Compile Include="Schema\DocumentField.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
