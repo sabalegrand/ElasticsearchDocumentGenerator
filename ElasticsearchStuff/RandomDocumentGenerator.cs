@@ -28,6 +28,7 @@ namespace ElasticsearchStuff
                 {
                     document.AddField(GenerateField(fieldSchema));
                 }
+                document.AddField("@timestamp", DateTime.UtcNow);
             }
             catch (Exception)
             {
